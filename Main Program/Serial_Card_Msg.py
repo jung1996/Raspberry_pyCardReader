@@ -22,7 +22,7 @@
 '''
 
 import threading
-import struct
+import struct  #이게 뭔지..
 import time
 
 SERIAL_VERSION = 1
@@ -63,7 +63,7 @@ class CardMsgRecvThread(threading.Thread, QObject):
 	recv_cplt = pyqtSignal(int, str)
 
 	def __init__(self, port, index):
-		threading.Thread.__init__(self)
+		threading.Thread.__init__(self)   #이부분 이해하기 어렵네요..
 		self.port = port
 		self.index = index # 쓰레드를 구분하기 위한 ID
 		

@@ -17,7 +17,7 @@ import serial
 import threading
 #import timeout
 import config
-#import Serial_Card_Msg
+import Serial_Card_Msg           
 #import Serial_QR_Msg
 #import WinSock_Msg
 import pymysql
@@ -65,7 +65,7 @@ SOCK_CONTENT_ACK = "XX"
 
 
 
-class MainWindow(QMainWindow, ui_form):
+class MainWindow(QMainWindow, ui_form):  #이 클래스를 어디에 사용하는건지 모르겠음..
 
 	INDEX_CARD1 = 1
 	card1_connect = False
@@ -125,20 +125,20 @@ class MainWindow(QMainWindow, ui_form):
 		
 		#gpio 핀 초기화
 		# ** 라즈베리파이에서 구현하면 주석 푸세요! **
-		#self.gpio = GPIO_Control()
+		self.gpio = GPIO_Control()
 		
 		
 		#serial 통신 연결 시도
 		try:
 			card1_ser = serial.Serial(cfg.CARD1, 9600, timeout=0.2)
 			# 시리얼 데이터 읽는 쓰레드 생성
-			card1_recv = Serial_Card_Msg.CardMsgRecvThread(card1_ser, self.INDEX_CARD1)
+			card1_recv = Serial_Card_Msg.CardMsgRecvThread(card1_ser, self.INDEX_CARD1)  #어디서 불러왔는지 모르겠음...
 			
-			#serial 통신을 처리하는 각 쓰레들로부터 데이터를 받을 경우 처리하는 콜백함수 등록
+			#serial 통신을 처리하는 각 쓰레드들로부터 데이터를 받을 경우 처리하는 콜백함수 등록
 			card1_recv.recv_cplt.connect(self.cb_serial_card_recv_cplt)
 			card1_recv.start()
 			
-		except (OSError, serial.SerialException):
+		except (OSError, serial.SerialException):  #이게 무엇인지..
 			print('CARD1 통신 포트 연결 실패!! ')
 			
 		try:
@@ -375,4 +375,3 @@ if __name__ == "__main__":
 	
 	sys.exit(ret)
 
-#test

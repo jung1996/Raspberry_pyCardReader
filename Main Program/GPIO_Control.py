@@ -2,7 +2,7 @@ import RPi.GPIO as GPIO #GPIO 라이브러리 불러오기
 # 설치 안될 경우 "https://m.blog.naver.com/PostView.naver?blogId=simplex245&logNo=220647994727&proxyReferer=https:%2F%2Fwww.google.com%2F"
 # 참고.. 윈도우 환경이라 구현만 해두고 안쓸거임, 설치했는데도 IMPORT 안되는 것 같음.
 
-class GPIO_Control():
+class GPIO_Control(): #전체적으로 한번 설명 듣고싶음
 
 	GPIOIO_DO = [22,6,13,19,26,11,27,4]
 	GPIOIO_DI = [17,12,16,21,20,18,23,24]
