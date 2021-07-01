@@ -17,6 +17,8 @@ import serial
 import threading
 import config
 import Serial_Card_Msg
+import GPIO_Control
+import RPi.GPIO as GPIO
 
 #serial, sock, db 통신 연결을 위한 config 파일 load
 cfg = config.Env_Config()
@@ -26,6 +28,23 @@ ui_form = uic.loadUiType("main_panel.ui")[0]
 #시간 표시하기 위한 타이머
 timer = QTimer()
 
+GPIO_DO = [2,3,17,18,27,22,23,24]
+GPIO_DI = [11,7,6,16,19,20,26,21]
+
+
+#불필요한 WARNING 제거
+GPIO.setwarnings(False)
+        
+#GPIO 핀의 번호모드 설정
+GPIO.setmode(GPIO.BCM)
+		
+#GPIO_INPUT 핀 설정
+for channel in GPIO_DI:
+	GPIO.setup([channel], GPIO.IN)
+			
+#GPIO_OUTPUT 핀 설정
+for channel in GPIO_DO:
+	GPIO.setup([channel], GPIO.OUT, initial=GPIO.LOW)
 
 
 ##화면1에서 화면2 전환 방법
@@ -59,6 +78,10 @@ class MainWindow(QMainWindow, ui_form):
 		#시간 표시하기 위한 Timer
 		timer.start(1000)
 		timer.timeout.connect(self.cb_timeout) #1초마다 timeout 이벤트가 발생하며, timeout 함수를 호출함
+		timer.timeout.connect(self.in1)
+		timer.timeout.connect(self.in2)
+		timer.timeout.connect(self.out1)
+		timer.timeout.connect(self.out2)
 		
 		#종료 버튼 활성화
 		self.pushButton_exit1.clicked.connect(QCoreApplication.instance().quit)
@@ -74,7 +97,9 @@ class MainWindow(QMainWindow, ui_form):
 		self.pushButton_silo2.setEnabled(True)
 		self.pushButton_ok1.setEnabled(False)
 		self.pushButton_ok2.setEnabled(False)
-		#self.gpio = GPIO_Control()
+
+
+		#self.gpio = GPIO_Control.GPIO_Control()
 		
 		#serial 통신 연결 시도
 		try:
@@ -141,8 +166,28 @@ class MainWindow(QMainWindow, ui_form):
 				
 		except:
 			pass
-		
 
+	def in1(self):		
+		if GPIO.input(GPIO_DI[0]):
+			self.input_Led1.setStyleSheet("Color:red;")
+		else:
+			self.input_Led1.setStyleSheet("Color:blue;")
+	def in2(self):		
+		if GPIO.input(GPIO_DI[1]):
+			self.input_Led2.setStyleSheet("Color:red;")
+		else:
+			self.input_Led2.setStyleSheet("Color:blue;")
+	def out1(self):	
+		if GPIO.output(GPIO_DO[0]):
+			self.output_Led1.setStyleSheet("Color:red;")
+		else:
+			self.output_Led1.setStyleSheet("Color:blue;")
+	def out2(self):
+		if GPIO.output(GPIO_DO[1]):
+			self.output_Led2.setStyleSheet("Color:red;")
+		else:
+			self.output_Led2.setStyleSheet("Color:blue;")
+			
 	def cb_timeout(self):
 		self.currentDateTime = QDateTime.currentDateTime() # 시간 받아옴
 		self.dateTimeEdit.setDateTime(self.currentDateTime) # 받아온 시간을 GUI 에 표시
@@ -157,13 +202,13 @@ class MainWindow(QMainWindow, ui_form):
 		self.pushButton_silo1.setEnabled(True)
 		self.pushButton_silo2.setEnabled(False)
 
-	def pushButton_ok1_func(self):
+	'''def pushButton_ok1_func(self):
 			current_page = self.stackedWidget.currentIndex()
 			self.stackedWidget.setCurrentIndex(current_page+1)
 
 	def pushButton_ok2_func(self):
 			current_page = self.stackedWidget.currentIndex()
-			self.stackedWidget.setCurrentIndex(current_page+1)
+			self.stackedWidget.setCurrentIndex(current_page+1)'''
 
 
 if __name__ == "__main__":

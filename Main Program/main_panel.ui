@@ -287,7 +287,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>open time</string>
+        <string>opening</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_8">
@@ -300,7 +300,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>open time</string>
+        <string>opening</string>
        </property>
       </widget>
       <widget class="QTextEdit" name="textEdit_time1">
@@ -658,6 +658,94 @@
       </widget>
      </item>
     </layout>
+   </widget>
+   <widget class="QLabel" name="input_Led1">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>400</y>
+      <width>71</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:rgb(255, 0, 4)</string>
+    </property>
+    <property name="text">
+     <string>input01</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="input_Led2">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>400</y>
+      <width>71</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:rgb(255, 0, 4)</string>
+    </property>
+    <property name="text">
+     <string>input02</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="output_Led1">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>400</y>
+      <width>71</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:rgb(255, 0, 4)</string>
+    </property>
+    <property name="text">
+     <string>output01</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="output_Led2">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>400</y>
+      <width>71</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:rgb(255, 0, 4)</string>
+    </property>
+    <property name="text">
+     <string>output02</string>
+    </property>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
