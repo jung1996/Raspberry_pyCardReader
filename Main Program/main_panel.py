@@ -15,13 +15,8 @@ from PyQt5.QtWidgets import *
 
 import serial
 import threading
-#import timeout
 import config
-import Serial_Card_Msg           
-#import Serial_QR_Msg
-#import WinSock_Msg
-import pymysql
-from GPIO_Control import * #GPIO 제어 전용 CLASS 호출
+import Serial_Card_Msg
 
 #serial, sock, db 통신 연결을 위한 config 파일 load
 cfg = config.Env_Config()
@@ -30,21 +25,8 @@ cfg = config.Env_Config()
 ui_form = uic.loadUiType("main_panel.ui")[0]
 #시간 표시하기 위한 타이머
 timer = QTimer()
-#db 접근을 위한 변수들 (사용법 참고: https://devpouch.tistory.com/96)
-# https://www.programcreek.com/python/example/68898/pymysql.Error 에러 처리 방법
-''' 주석 나중에 푸세요! '''
-#mysql_conn = pymysql.connect(host=cfg.DB_HOST, user=cfg.DB_USER, password=cfg.DB_PASSWORD, charset='utf8') 
-#mysql_cursor = mysql_conn.cursor() 
-''' mysql 데이터 읽는 방법
-#mysql_query = "SELECT * FROM user where car_number = %s" 
-#mysql_cursor.execute(mysql_query, ("서울0123"))
-#mysql_res = mysql_cursor.fetchall()  # 리스트 타입으로 받아옴
-#mysql_res = mysql_cursor.fetchone()  # 리스트 타입으로 받아옴
 
-for data in mysql_res: 
-        print(data) 
 
-'''
 
 ##화면1에서 화면2 전환 방법
 '''
@@ -52,20 +34,8 @@ for data in mysql_res:
 		self.stackedWidget.setCurrentIndex(current_page+1)
 '''
 
-# 소켓 통신 CMD에 따른 처리를 위한 함수
-#Recv. Command
-SOCK_CONTENT_CMD_DO_ONOFF = "01"	# MSG에 Set/Reset되어있는 DO핀을 ON/OFF로 설정
-SOCK_CONTENT_CMD_DO_ALL_ON = "10"   # MSG 상관 없이 모든 DO 핀을 ON으로 설정
-SOCK_CONTENT_CMD_DO_ALL_OFF = "20"  # MSG 상관 없이 모든 DO 핀을 OFF로 설정
-SOCK_CONTENT_CMD_DO_AUTO_TOGGLE = "90"  # DO? 핀을 ON하고 1초뒤에 OFF 한다
-SOCK_CONTENT_CMD_DO_ALL_OFF = "99"  # DI? 핀이 ON되면 DO? 핀을 ON 함. (정의가 명확해야 할듯..)
 
-#Send. Command
-SOCK_CONTENT_ACK = "XX"
-
-
-
-class MainWindow(QMainWindow, ui_form):  #이 클래스를 어디에 사용하는건지 모르겠음..
+class MainWindow(QMainWindow, ui_form):
 
 	INDEX_CARD1 = 1
 	card1_connect = False
@@ -76,32 +46,15 @@ class MainWindow(QMainWindow, ui_form):  #이 클래스를 어디에 사용하�
 	card2_connect = False
 	card2_id = 87654321
 	card2_car_num = "서울1234"
-	
-	INDEX_QR1 = 3
-	qr1_connect = False
-	qr1_company = "ecoss1"
-	qr1_product = "capacitor"
-	qr1_car_num = "서울1234"
-	qr1_quantity = 156
-	
-	INDEX_QR2 = 4
-	qr1_connect = False
-	qr1_company = "ecoss2"
-	qr1_product = "capacitor"
-	qr1_car_num = "서울1234"
-	qr1_quantity = 651
-	
-	mysql_query = "SELECT car_num FROM card_table where card_id = %s" 
 
 	def __init__(self):
 		super().__init__()
 		self.setupUi(self)
 		self.setFixedSize(800, 480)
 		
-		#현재 시간 디스플레이봉천동 
+		#현재 시간 디스플레이 
 		self.currentDateTime = QDateTime.currentDateTime() # 시간 받아옴
 		self.dateTimeEdit.setDateTime(self.currentDateTime) # 받아온 시간을 GUI 에 표시
-		self.dateTimeEdit2.setDateTime(self.currentDateTime) # 받아온 시간을 GUI 에 표시
 		
 		#시간 표시하기 위한 Timer
 		timer.start(1000)
@@ -109,36 +62,31 @@ class MainWindow(QMainWindow, ui_form):  #이 클래스를 어디에 사용하�
 		
 		#종료 버튼 활성화
 		self.pushButton_exit1.clicked.connect(QCoreApplication.instance().quit)
-		self.pushButton_exit2.clicked.connect(QCoreApplication.instance().quit)
 		
 		#화면1 ON/OFF 버튼 활성화
-		self.pushButton_on1.clicked.connect(self.pushButton_on1_func)
-		self.pushButton_off1.clicked.connect(self.pushButton_off1_func)
-		self.pushButton_on2.clicked.connect(self.pushButton_on2_func)
-		self.pushButton_off2.clicked.connect(self.pushButton_off2_func)
-		
-		self.pushButton_on1.setEnabled(False)
-		self.pushButton_off1.setEnabled(False)
+		self.pushButton_silo1.clicked.connect(self.pushButton_silo1_func)
+		self.pushButton_silo2.clicked.connect(self.pushButton_silo2_func)
 
-		self.pushButton_on2.setEnabled(False)
-		self.pushButton_off2.setEnabled(False)
-		
-		#gpio 핀 초기화
-		# ** 라즈베리파이에서 구현하면 주석 푸세요! **
-		self.gpio = GPIO_Control()
-		
+		self.pushButton_ok1.clicked.connect(self.pushButton_ok1_func)
+		self.pushButton_ok2.clicked.connect(self.pushButton_ok2_func)
+
+		self.pushButton_silo1.setEnabled(True)
+		self.pushButton_silo2.setEnabled(True)
+		self.pushButton_ok1.setEnabled(False)
+		self.pushButton_ok2.setEnabled(False)
+		#self.gpio = GPIO_Control()
 		
 		#serial 통신 연결 시도
 		try:
 			card1_ser = serial.Serial(cfg.CARD1, 9600, timeout=0.2)
 			# 시리얼 데이터 읽는 쓰레드 생성
-			card1_recv = Serial_Card_Msg.CardMsgRecvThread(card1_ser, self.INDEX_CARD1)  #어디서 불러왔는지 모르겠음...
+			card1_recv = Serial_Card_Msg.CardMsgRecvThread(card1_ser, self.INDEX_CARD1)
 			
-			#serial 통신을 처리하는 각 쓰레드들로부터 데이터를 받을 경우 처리하는 콜백함수 등록
+			#serial 통신을 처리하는 각 쓰레들로부터 데이터를 받을 경우 처리하는 콜백함수 등록
 			card1_recv.recv_cplt.connect(self.cb_serial_card_recv_cplt)
 			card1_recv.start()
 			
-		except (OSError, serial.SerialException):  #이게 무엇인지..
+		except (OSError, serial.SerialException):
 			print('CARD1 통신 포트 연결 실패!! ')
 			
 		try:
@@ -152,182 +100,44 @@ class MainWindow(QMainWindow, ui_form):  #이 클래스를 어디에 사용하�
 			
 		except (OSError, serial.SerialException):
 			print('CARD2 통신 포트 연결 실패!! ')
-			
-		try:
-			qr1_ser = serial.Serial(cfg.QR1, 9600, timeout=0.2)
-			# 시리얼 데이터 읽는 쓰레드 생성
-			qr1_recv = Serial_QR_Msg.QRMsgRecvThread(qr1_ser, self.INDEX_QR1)
-			
-			#serial 통신을 처리하는 각 쓰레들로부터 데이터를 받을 경우 처리하는 콜백함수 등록
-			qr1_recv.recv_cplt.connect(self.cb_serial_qr_recv_cplt)
-			qr1_recv.start()
-			
-		except (OSError, serial.SerialException):
-			print('QR1 통신 포트 연결 실패!! ')
-			
-		try:
-			qr2_ser = serial.Serial(cfg.QR2, 9600, timeout=0.2)
-			# 시리얼 데이터 읽는 쓰레드 생성
-			qr2_recv = Serial_QR_Msg.QRMsgRecvThread(qr2_ser, self.INDEX_QR2)
-			
-			#serial 통신을 처리하는 각 쓰레들로부터 데이터를 받을 경우 처리하는 콜백함수 등록
-			qr2_recv.recv_cplt.connect(self.cb_serial_qr_recv_cplt)
-			qr2_recv.start()
-			
-		except (OSError, serial.SerialException):
-			print('QR2 통신 포트 연결 실패!! ')
-		#통신 연결 시도 끝
-		
-		
-		#sock 통신 연결 시도
-		try:
-			#서버에 Bind
-			c_socket = socket(AF_INET, SOCK_STREAM)
-			c_socket.connect((cfg.SOCK_HOST, cfg.SOCK_PORT))
-			
-			#데이터 송신 방법
-			#c_socket.send('send data!!'.encode('utf-8'))
-			
-			# SOCK 데이터 읽는 쓰레드 생성
-			sock_recv = WinSock_Msg.SockMsgRecvThread(c_socket)
-			
-			# sock 통신으로부터 cmd, msg 데이터가 정상 ""수신""되면 호출되는 콜백함수
-			sock_recv.recv_cplt.connect(self.cb_sock_recv_cplt)
-			sock_recv.start()
-			
-		except:
-			print('SOCK 통신 연결 실패!! ')
+
 		
 	#CARD 리더기 시리얼 통신으로 부터 데이터가 정상적으로 수신되면 호출되는 함수
 	@pyqtSlot(int, str)
 	def cb_serial_card_recv_cplt(self, thread_index, card_id):
 		try:
 			if thread_index == self.INDEX_CARD1:
-				#Mysql DB 비교해서, 정상적인 카드 데이터이면 GUI에 출력
-				#mysql_cursor.execute(mysql_query, card_id)
-				#mysql_car_num = mysql_cursor.fetchone()  # 차량 번호를 받아옴
-				
-				#카드 번호가 등록되어있어서 차량 번호를 정상 리턴했을 경우
-				#카드 번호가 무조껀 1개 등록되어 있다는 가정하에 fetchone() 함수 썼음
-				if mysql_car_num:
-					self.card1_connect = True
-					self.card1_car_num = mysql_car_num
-					self.card1_id = card_id
-				else:
-					self.card1_connect = False
-					self.card1_car_num = ''
-					self.card1_id = ''
-					
+
+				self.card1_connect = True
+				self.card1_car_num = "1234"
+				self.card1_id = card_id
+
+				print('(recv data) card_id1 :', self.card1_id)
 					
 				#DB에 등록되어 있는 카드 데이터가 들어오면, GUI에 표시함
 				if self.card1_connect == True:
 					
-					self.card1_textbox.setText(self.card1_id)
-					self.card1_textbox2.setText(self.card1_id)
-					
-					self.car1_textbox.setText(self.card1_car_num)
-					
-					self.pushButton_on1.setEnabled(True)
-					self.pushButton_off1.setEnabled(False)
-				
-				else:
-					self.card2_textbox.setText(self.card1_id)
-					self.card2_textbox2.setText(self.card1_id)
-					
-					self.car2_textbox.setText(self.card1_car_num)
-					
-					self.pushButton_on1.setEnabled(True)
-					self.pushButton_off1.setEnabled(False)
+					self.textEdit_card1.setText(self.card1_id)
+					print("ok!")
+					self.pushButton_ok1.setEnabled(True)
+					self.pushButton_ok2.setEnabled(True)
 					
 			elif thread_index == self.INDEX_CARD2:
-				#DB 비교해서, 정상적인 카드 데이터이면 GUI에 출력
-				mysql_cursor.execute(mysql_query, card_id)
-				mysql_car_num = mysql_cursor.fetchone()  # 차량 번호를 받아옴
-				
-				#카드 번호가 등록되어있어서 차량 번호를 정상 리턴했을 경우
-				#카드 번호가 무조껀 1개 등록되어 있다는 가정하에 fetchone() 함수 썼음
-				if mysql_car_num:
-					self.card2_connect = True
-					self.card2_car_num = mysql_car_num
-					self.card2_id = card_id
-				else:
-					self.card2_connect = False
-					self.card2_car_num = ''
-					self.card2_id = ''
-					
-					
+
+				self.card2_connect = True
+				self.card2_car_num = "5678"
+				self.card2_id = card_id
+
+				print('(recv data) card_id2 :', self.card2_id)
+	
 				#DB에 등록되어 있는 카드 데이터가 들어오면, GUI에 표시함
 				if self.card2_connect == True:
 					
-					self.card2_textbox.setText(self.card2_id)
-					self.card2_textbox2.setText(self.card2_id)
+					self.textEdit_card2.setText(self.card2_id)
+					print("ok!")
+					self.pushButton_ok1.setEnabled(True)
+					self.pushButton_ok2.setEnabled(True)
 					
-					self.car2_textbox.setText(self.card2_car_num)
-					
-					self.pushButton_on2.setEnabled(True)
-					self.pushButton_off2.setEnabled(False)
-				
-				else:
-					self.card2_textbox.setText(self.card2_id)
-					self.card2_textbox2.setText(self.card2_id)
-					
-					self.car2_textbox.setText(self.card2_car_num)
-					
-					self.pushButton_on2.setEnabled(True)
-					self.pushButton_off2.setEnabled(False)
-
-				
-		except:
-			pass
-	
-	#QR 시리얼 통신으로 부터 데이터가 정상적으로 수신되면 호출되는 함수
-	@pyqtSlot(int, str, str, str, str)
-	def cb_serial_qr_recv_cplt(self, thread_index, company, product, car_number, quantity):
-		try:
-		
-			if thread_index == self.INDEX_QR1:
-				#카드가 먼저 찍혀있는지 확인 후에, 정상이면 처리
-				if self.card1_connect == True:
-					print("card1 connect ok")
-				
-			elif thread_index == self.INDEX_QR2:
-				#카드가 먼저 찍혀있는지 확인 후에, 정상이면 처리
-				if self.card2_connect == True:
-					print("card2 connect ok")
-				
-		except:
-			pass
-			
-	#SOCK 통신으로 부터 데이터가 정상적으로 수신되면 호출되는 함수
-	@pyqtSlot(str, str)
-	def cb_sock_recv_cplt(self, cmd, msg):
-		try:
-		
-'''
-#데이터 송신 방법
-#c_socket.send('send data!!'.encode('utf-8'))
-
-#recv cmd list
-SOCK_CONTENT_CMD_DO_ONOFF = "01"	# MSG에 Set/Reset되어있는 DO핀을 ON/OFF로 설정
-SOCK_CONTENT_CMD_DO_ALL_ON = "10"   # MSG 상관 없이 모든 DO 핀을 ON으로 설정
-SOCK_CONTENT_CMD_DO_ALL_OFF = "20"  # MSG 상관 없이 모든 DO 핀을 OFF로 설정
-SOCK_CONTENT_CMD_DO_AUTO_TOGGLE = "90"  # DO? 핀을 ON하고 1초뒤에 OFF 한다
-SOCK_CONTENT_CMD_DO_ALL_OFF = "99"  # DI? 핀이 ON되면 DO? 핀을 ON 함. (정의가 명확해야 할듯..)
-'''
-			if cmd == SOCK_CONTENT_CMD_DO_ONOFF:
-				
-				
-			elif cmd == SOCK_CONTENT_CMD_DO_ALL_ON:
-				
-					
-			elif cmd == SOCK_CONTENT_CMD_DO_ALL_OFF:
-				
-					
-			elif cmd == SOCK_CONTENT_CMD_DO_AUTO_TOGGLE:
-				
-					
-			elif cmd == SOCK_CONTENT_CMD_DO_ALL_OFF:
-				
 				
 		except:
 			pass
@@ -336,26 +146,24 @@ SOCK_CONTENT_CMD_DO_ALL_OFF = "99"  # DI? 핀이 ON되면 DO? 핀을 ON 함. (�
 	def cb_timeout(self):
 		self.currentDateTime = QDateTime.currentDateTime() # 시간 받아옴
 		self.dateTimeEdit.setDateTime(self.currentDateTime) # 받아온 시간을 GUI 에 표시
-		self.dateTimeEdit2.setDateTime(self.currentDateTime) # 받아온 시간을 GUI 에 표시
 	
 	#카드 리더기로 데이터가 읽히고, DB에 정상 조회되면 버튼이 활성화 된다.
 	#여기다가 처리할 로직 넣으면 됨
-	def pushButton_on1_func(self):
-		self.pushButton_on1.setEnabled(False)
-		self.pushButton_off1.setEnabled(True)
+	def pushButton_silo1_func(self):
+		self.pushButton_silo1.setEnabled(False)
+		self.pushButton_silo2.setEnabled(True)
 		
-	def pushButton_off1_func(self):
-		self.pushButton_on1.setEnabled(True)
-		self.pushButton_off1.setEnabled(False)
-		
-	def pushButton_on2_func(self):
-		self.pushButton_on2.setEnabled(False)
-		self.pushButton_off2.setEnabled(True)
-		
-	def pushButton_off2_func(self):
-		self.pushButton_on2.setEnabled(True)
-		self.pushButton_off2.setEnabled(False)
-		
+	def pushButton_silo2_func(self):
+		self.pushButton_silo1.setEnabled(True)
+		self.pushButton_silo2.setEnabled(False)
+
+	def pushButton_ok1_func(self):
+			current_page = self.stackedWidget.currentIndex()
+			self.stackedWidget.setCurrentIndex(current_page+1)
+
+	def pushButton_ok2_func(self):
+			current_page = self.stackedWidget.currentIndex()
+			self.stackedWidget.setCurrentIndex(current_page+1)
 
 
 if __name__ == "__main__":
@@ -367,11 +175,5 @@ if __name__ == "__main__":
 	
 	#타이머 종료
 	timer.stop()
-	
-	#db 종료, 나중에 연결하면 주석 푸세요,.
-	#mysql_conn.commit() 
-	#mysql_cursor.close()
-	#mysql_conn.close() 
-	
 	sys.exit(ret)
 

@@ -4,11 +4,11 @@ import configparser
 CONFIG_FILE_NAME = 'setting.cfg'
 
 class Env_Config():
-	def __init__(self):  #생성자라는게 왜필요한건가요..
+	def __init__(self):
 
-		fp = None # 왜 None으로 했는지
+		fp = None
 		try:
-			fp = open(CONFIG_FILE_NAME, 'r')    #r이 무엇인지
+			fp = open(CONFIG_FILE_NAME, 'r')
 		except:
 			self.BuildDefault()
 		finally:
@@ -16,13 +16,13 @@ class Env_Config():
 				fp.close()
 
 		cnt = 1
-		while cnt > 0: 
+		while cnt > 0:
 			try:
-				cp = configparser.ConfigParser()   #이게 뭔지
-				cp.read(CONFIG_FILE_NAME, encoding='utf-8') 
+				cp = configparser.ConfigParser()
+				cp.read(CONFIG_FILE_NAME, encoding='utf-8')
 				print('load config file success')
 				
-				self.COM_PORT = cp['DEFAULT']['COM_PORT'] #self를 넣어야 하나요?
+				self.COM_PORT = cp['DEFAULT']['COM_PORT']
 				self.CARD1 = cp['DEFAULT']['CARD1_COM']
 				self.CARD2 = cp['DEFAULT']['CARD2_COM']
 				self.QR1 = cp['DEFAULT']['QR1_COM']
@@ -59,8 +59,8 @@ class Env_Config():
 		newcp.write(fp)
 
 
-if __name__ == "__main__":     #이게 뭔지 이해가 잘안갑니다.
-	cfg = Env_Config()   #이게뭐죠
+if __name__ == "__main__":
+	cfg = Env_Config()
 
-	print('COM port = ' + cfg.COM_PORT)   
+	print('COM port = ' + cfg.COM_PORT)
 

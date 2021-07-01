@@ -20,10 +20,11 @@
 
 
 '''
-
+from PyQt5.QtCore import *
 import threading
-import struct  #이게 뭔지..
+import struct
 import time
+import serial
 
 SERIAL_VERSION = 1
 
@@ -63,7 +64,8 @@ class CardMsgRecvThread(threading.Thread, QObject):
 	recv_cplt = pyqtSignal(int, str)
 
 	def __init__(self, port, index):
-		threading.Thread.__init__(self)   #이부분 이해하기 어렵네요..
+		threading.Thread.__init__(self)
+		QObject.__init__(self)
 		self.port = port
 		self.index = index # 쓰레드를 구분하기 위한 ID
 		
@@ -81,7 +83,7 @@ class CardMsgRecvThread(threading.Thread, QObject):
 			
 				if self.state == self.STATE_IDLE:
 					data = self.port.read(1)		 # 1바이트 읽음
-                    data = data.decode()
+					data = data.decode()
 
 					if len(data) == 0:
 						continue
@@ -99,7 +101,7 @@ class CardMsgRecvThread(threading.Thread, QObject):
 						
 				elif self.state == self.STATE_ETX_CARD_ID: 		# STX 수신 완료, ETX 수신 할 때 까지 CARD ID 읽음
 					data = self.port.read(1)
-                    data = data.decode()                    
+					data = data.decode()	 
 
 					if len(data) == 0:
 						continue
@@ -108,10 +110,9 @@ class CardMsgRecvThread(threading.Thread, QObject):
 						self.recv_buff = ''
 						continue
 
-					if ord(data[0]) == SERIAL_ETX:
+					if ord(data) == SERIAL_ETX:
 						# ** 수신 완료! GUI로 CARD ID 수신되었음을 알림, 처음 STATE로 돌아감
 						self.recv_cplt.emit(self.index, self.recv_buff)
-						print('(recv data) card_id :', self.recv_buff)
 						
 						self.state = self.STATE_IDLE
 						self.recv_buff = ''
@@ -122,7 +123,7 @@ class CardMsgRecvThread(threading.Thread, QObject):
 						
 				elif self.state == self.STATE_END1_CARD_ID:
 					data = self.port.read(1)
-                    data = data.decode()
+					data = data.decode()	 
 
 					if len(data) == 0:
 						continue
@@ -131,7 +132,7 @@ class CardMsgRecvThread(threading.Thread, QObject):
 						self.recv_buff = ''
 						continue
 
-					if ord(data[0]) == SERIAL_END1:
+					if ord(data) == SERIAL_END1:
 						# ** END1 수신 완료! END2 대기 상태로 들어감
 						self.state = self.STATE_END2_CARD_ID
 						
@@ -141,7 +142,7 @@ class CardMsgRecvThread(threading.Thread, QObject):
 							
 				elif self.state == self.STATE_END2_CARD_ID:
 					data = self.port.read(1)
-                    data = data.decode()
+					data = data.decode()	 
 
 					if len(data) == 0:
 						continue
@@ -153,7 +154,6 @@ class CardMsgRecvThread(threading.Thread, QObject):
 					if ord(data[0]) == SERIAL_END2:
 						# ** END2 수신 완료! GUI로 CARD ID 수신되었음을 알림, 처음 STATE로 돌아감
 						self.recv_cplt.emit(self.index, self.recv_buff)
-						print('(recv data) card_id :', self.recv_buff)
 						
 						self.state = self.STATE_IDLE
 						self.recv_buff = ''
