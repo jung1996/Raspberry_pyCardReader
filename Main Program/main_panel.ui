@@ -35,7 +35,7 @@
      <string notr="true">color: rgb(0, 0, 0);</string>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="page">
      <widget class="QGroupBox" name="groupBox1">
@@ -326,6 +326,16 @@
        </property>
        <property name="frameShape">
         <enum>QFrame::WinPanel</enum>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_time1">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>80</y>
+         <width>113</width>
+         <height>32</height>
+        </rect>
        </property>
       </widget>
      </widget>

@@ -14,10 +14,9 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import *
 
 import serial
-import threading
 import config
 import Serial_Card_Msg
-import GPIO_Control
+import Serial_QR_Msg
 import RPi.GPIO as GPIO
 
 #serial, sock, db 통신 연결을 위한 config 파일 load
@@ -80,9 +79,9 @@ class MainWindow(QMainWindow, ui_form):
 		timer.timeout.connect(self.cb_timeout) #1초마다 timeout 이벤트가 발생하며, timeout 함수를 호출함
 		timer.timeout.connect(self.in1)
 		timer.timeout.connect(self.in2)
-		timer.timeout.connect(self.out1)
-		timer.timeout.connect(self.out2)
-		
+		timer.timeout.connect(self.lcd_run)
+		timer.timeout.connect(self.in1_check)
+	
 		#종료 버튼 활성화
 		self.pushButton_exit1.clicked.connect(QCoreApplication.instance().quit)
 		
@@ -126,6 +125,18 @@ class MainWindow(QMainWindow, ui_form):
 		except (OSError, serial.SerialException):
 			print('CARD2 통신 포트 연결 실패!! ')
 
+		try:
+			qr1_ser = serial.Serial(cfg.QR1, 9600, timeout=0.2)
+			# 시리얼 데이터 읽는 쓰레드 생성
+			qr1_recv = Serial_QR_Msg.QRMsgRecvThread(qr1_ser, self.INDEX_QR1)
+			
+			#serial 통신을 처리하는 각 쓰레들로부터 데이터를 받을 경우 처리하는 콜백함수 등록
+			qr1_recv.recv_cplt.connect(self.cb_serial_qr_recv_cplt)
+			qr1_recv.start()
+			
+		except (OSError, serial.SerialException):
+			print('QR1 통신 포트 연결 실패!! ')
+
 		
 	#CARD 리더기 시리얼 통신으로 부터 데이터가 정상적으로 수신되면 호출되는 함수
 	@pyqtSlot(int, str)
@@ -166,6 +177,20 @@ class MainWindow(QMainWindow, ui_form):
 				
 		except:
 			pass
+	
+	def in1_check(self):
+		if GPIO.input(GPIO_DI[4]):
+			current_page = self.stackedWidget.currentIndex()
+			self.stackedWidget.setCurrentIndex(current_page+0)	
+		else:
+			current_page = self.stackedWidget.currentIndex()
+			self.stackedWidget.setCurrentIndex(current_page+1)
+
+	def lcd_run(self):
+		lcd = self.lcdNumber_open2
+		for k in range(1,60):
+			lcd_text = k
+			lcd.display(lcd_text)
 
 	def in1(self):		
 		if GPIO.input(GPIO_DI[0]):
@@ -177,16 +202,6 @@ class MainWindow(QMainWindow, ui_form):
 			self.input_Led2.setStyleSheet("Color:red;")
 		else:
 			self.input_Led2.setStyleSheet("Color:blue;")
-	def out1(self):	
-		if GPIO.output(GPIO_DO[0]):
-			self.output_Led1.setStyleSheet("Color:red;")
-		else:
-			self.output_Led1.setStyleSheet("Color:blue;")
-	def out2(self):
-		if GPIO.output(GPIO_DO[1]):
-			self.output_Led2.setStyleSheet("Color:red;")
-		else:
-			self.output_Led2.setStyleSheet("Color:blue;")
 			
 	def cb_timeout(self):
 		self.currentDateTime = QDateTime.currentDateTime() # 시간 받아옴
@@ -197,19 +212,27 @@ class MainWindow(QMainWindow, ui_form):
 	def pushButton_silo1_func(self):
 		self.pushButton_silo1.setEnabled(False)
 		self.pushButton_silo2.setEnabled(True)
-		
+		GPIO.output(GPIO_DO[0], 1)
+		GPIO.output(GPIO_DO[1], 0)
+		self.output_Led2.setStyleSheet("Color:red;")
+		self.output_Led1.setStyleSheet("Color:blue;")
+	
 	def pushButton_silo2_func(self):
 		self.pushButton_silo1.setEnabled(True)
 		self.pushButton_silo2.setEnabled(False)
+		GPIO.output(GPIO_DO[1], 1)
+		GPIO.output(GPIO_DO[0], 0)
+		self.output_Led1.setStyleSheet("Color:red;")
+		self.output_Led2.setStyleSheet("Color:blue;")
+		
 
-	'''def pushButton_ok1_func(self):
+	def pushButton_ok1_func(self):
 			current_page = self.stackedWidget.currentIndex()
 			self.stackedWidget.setCurrentIndex(current_page+1)
 
 	def pushButton_ok2_func(self):
 			current_page = self.stackedWidget.currentIndex()
-			self.stackedWidget.setCurrentIndex(current_page+1)'''
-
+			self.stackedWidget.setCurrentIndex(current_page+1)
 
 if __name__ == "__main__":
 	import sys
