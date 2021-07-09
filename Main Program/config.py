@@ -8,7 +8,7 @@ class Env_Config():
 
 		fp = None
 		try:
-			fp = open(CONFIG_FILE_NAME, 'r')
+			fp = open(CONFIG_FILE_NAME, 'r', encoding= 'utf-8')
 		except:
 			self.BuildDefault()
 		finally:

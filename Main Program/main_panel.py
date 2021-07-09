@@ -16,8 +16,14 @@ from PyQt5.QtWidgets import *
 import serial
 import config
 import Serial_Card_Msg
-import Serial_QR_Msg
+#import Serial_QR_Msg
+#import GPIO_Control
+import camera_data
+import time
+import argparse
 import RPi.GPIO as GPIO
+import WinSock_Msg
+from socket import *
 
 #serial, sock, db 통신 연결을 위한 config 파일 load
 cfg = config.Env_Config()
@@ -29,29 +35,19 @@ timer = QTimer()
 
 GPIO_DO = [2,3,17,18,27,22,23,24]
 GPIO_DI = [11,7,6,16,19,20,26,21]
-
-
 #불필요한 WARNING 제거
 GPIO.setwarnings(False)
-        
+
 #GPIO 핀의 번호모드 설정
 GPIO.setmode(GPIO.BCM)
-		
+
 #GPIO_INPUT 핀 설정
 for channel in GPIO_DI:
 	GPIO.setup([channel], GPIO.IN)
-			
+	
 #GPIO_OUTPUT 핀 설정
 for channel in GPIO_DO:
 	GPIO.setup([channel], GPIO.OUT, initial=GPIO.LOW)
-
-
-##화면1에서 화면2 전환 방법
-'''
-		current_page = self.stackedWidget.currentIndex()
-		self.stackedWidget.setCurrentIndex(current_page+1)
-'''
-
 
 class MainWindow(QMainWindow, ui_form):
 
@@ -69,37 +65,68 @@ class MainWindow(QMainWindow, ui_form):
 		super().__init__()
 		self.setupUi(self)
 		self.setFixedSize(800, 480)
+		self.page_num = 0 #페이지 숫자 변수 --
+		self.page_num2 = 0 #페이지 숫자 변수 ++
 		
 		#현재 시간 디스플레이 
 		self.currentDateTime = QDateTime.currentDateTime() # 시간 받아옴
 		self.dateTimeEdit.setDateTime(self.currentDateTime) # 받아온 시간을 GUI 에 표시
 		
-		#시간 표시하기 위한 Timer
+		#타이머 connect
 		timer.start(1000)
 		timer.timeout.connect(self.cb_timeout) #1초마다 timeout 이벤트가 발생하며, timeout 함수를 호출함
-		timer.timeout.connect(self.in1)
-		timer.timeout.connect(self.in2)
+		timer.timeout.connect(self.in_led)
+		timer.timeout.connect(self.in2in4)
+		timer.timeout.connect(self.in5in6_1)
+		timer.timeout.connect(self.in5in6_2)
+		timer.timeout.connect(self.in5in6)
 		timer.timeout.connect(self.lcd_run)
-		timer.timeout.connect(self.in1_check)
+		timer.timeout.connect(self.lcd_run2)
 	
 		#종료 버튼 활성화
 		self.pushButton_exit1.clicked.connect(QCoreApplication.instance().quit)
 		
-		#화면1 ON/OFF 버튼 활성화
-		self.pushButton_silo1.clicked.connect(self.pushButton_silo1_func)
-		self.pushButton_silo2.clicked.connect(self.pushButton_silo2_func)
-
+		#회면1 OK버튼 활성화
 		self.pushButton_ok1.clicked.connect(self.pushButton_ok1_func)
-		self.pushButton_ok2.clicked.connect(self.pushButton_ok2_func)
 
-		self.pushButton_silo1.setEnabled(True)
-		self.pushButton_silo2.setEnabled(True)
+		#화면1버튼 초기 값 설정
 		self.pushButton_ok1.setEnabled(False)
-		self.pushButton_ok2.setEnabled(False)
-
 
 		#self.gpio = GPIO_Control.GPIO_Control()
-		
+		#self.gpio.write_gpio(pin1,high);
+		#self.GPIO.input(self.GPIO_DI[0])
+		#self.GIPO_DI0 = GPIO.input(self.GPIO_DI[0])
+		'''
+		#camera 연결시도
+		try:
+			self.ap = argparse.ArgumentParser()
+			self.ap.add_argument("-o", "--output", type=str, default="barcodes.csv",help="path to output CSV file containing barcodes")
+			self.args = vars(self.ap.parse_args())
+
+			### From there, let’s initialize our video stream and open our CSV file:
+			# initialize the video stream and allow the camera sensor to warm up
+			# 비티오 스트림 초기화 및 카메라 센서가 예열되도록 함
+			print("[INFO] starting video stream...")
+
+			#self.vs = VideoStream(src=0).start()				 # USB 웹캠 카메라 사용시
+			self.vs = self.VideoStream(usePiCamera=True).start()	 # 파이 카메라 사용시
+			time.sleep(2.0)
+
+			# open the output CSV file for writing and initialize the set of
+			# barcodes found thus far
+			# 작성을 위해 출s력된 CSV 파일을 열고, 지금까지 찾은 바코드 세트 초기화
+			self.csv = open(self.args["output"], "w")
+			self.found = set()
+
+
+			# 시리얼 데이터 읽는 쓰레드 생성
+			camera_var = camera_data.Camera_Thread(self.vs, self.csv, self.found)
+			#camera_var.stop()
+
+		except (OSError, serial.SerialException):
+			print('카메라 연결 실패!!')
+		'''
+
 		#serial 통신 연결 시도
 		try:
 			card1_ser = serial.Serial(cfg.CARD1, 9600, timeout=0.2)
@@ -125,7 +152,7 @@ class MainWindow(QMainWindow, ui_form):
 		except (OSError, serial.SerialException):
 			print('CARD2 통신 포트 연결 실패!! ')
 
-		try:
+		'''try:
 			qr1_ser = serial.Serial(cfg.QR1, 9600, timeout=0.2)
 			# 시리얼 데이터 읽는 쓰레드 생성
 			qr1_recv = Serial_QR_Msg.QRMsgRecvThread(qr1_ser, self.INDEX_QR1)
@@ -135,7 +162,25 @@ class MainWindow(QMainWindow, ui_form):
 			qr1_recv.start()
 			
 		except (OSError, serial.SerialException):
-			print('QR1 통신 포트 연결 실패!! ')
+			print('QR1 통신 포트 연결 실패!! ')'''
+
+		try:
+			#서버에 Bind
+			c_socket = socket(AF_INET, SOCK_STREAM)
+			c_socket.connect((cfg.SOCK_IP, cfg.SOCK_PORT))
+			
+			#데이터 송신 방법
+			#c_socket.send('send data!!'.encode('utf-8'))
+			
+			# SOCK 데이터 읽는 쓰레드 생성
+			sock_recv = WinSock_Msg.SockMsgRecvThread(c_socket)
+			
+			# sock 통신으로부터 cmd, msg 데이터가 정상 ""수신""되면 호출되는 콜백함수
+			sock_recv.recv_cplt.connect(self.cb_sock_recv_cplt)
+			sock_recv.start()
+			
+		except(OSError):
+			print('SOCK 통신 연결 실패!! ')
 
 		
 	#CARD 리더기 시리얼 통신으로 부터 데이터가 정상적으로 수신되면 호출되는 함수
@@ -143,6 +188,7 @@ class MainWindow(QMainWindow, ui_form):
 	def cb_serial_card_recv_cplt(self, thread_index, card_id):
 		try:
 			if thread_index == self.INDEX_CARD1:
+				#if db() == True:
 
 				self.card1_connect = True
 				self.card1_car_num = "1234"
@@ -151,14 +197,15 @@ class MainWindow(QMainWindow, ui_form):
 				print('(recv data) card_id1 :', self.card1_id)
 					
 				#DB에 등록되어 있는 카드 데이터가 들어오면, GUI에 표시함
+				#카드1 데이터가 들어오면 ok버튼 화성화
 				if self.card1_connect == True:
 					
 					self.textEdit_card1.setText(self.card1_id)
 					print("ok!")
 					self.pushButton_ok1.setEnabled(True)
-					self.pushButton_ok2.setEnabled(True)
-					
+
 			elif thread_index == self.INDEX_CARD2:
+				#if db() == True:
 
 				self.card2_connect = True
 				self.card2_car_num = "5678"
@@ -167,70 +214,195 @@ class MainWindow(QMainWindow, ui_form):
 				print('(recv data) card_id2 :', self.card2_id)
 	
 				#DB에 등록되어 있는 카드 데이터가 들어오면, GUI에 표시함
+				#카드2 데이터가 들어오면 ok버튼 활성화
 				if self.card2_connect == True:
 					
 					self.textEdit_card2.setText(self.card2_id)
 					print("ok!")
 					self.pushButton_ok1.setEnabled(True)
-					self.pushButton_ok2.setEnabled(True)
-					
-				
 		except:
 			pass
-	
-	def in1_check(self):
-		if GPIO.input(GPIO_DI[4]):
-			current_page = self.stackedWidget.currentIndex()
-			self.stackedWidget.setCurrentIndex(current_page+0)	
-		else:
-			current_page = self.stackedWidget.currentIndex()
-			self.stackedWidget.setCurrentIndex(current_page+1)
 
+	@pyqtSlot(int, str)
+	def cb_sock_recv_cplt(self, c_socket):
+		try:
+			self.c_socket1 = c_socket
+			if True:
+				print('(recv data) TCP/IP :', self.c_socket1)
+					
+				#DB에 등록되어 있는 카드 데이터가 들어오면, GUI에 표시함
+				#카드1 데이터가 들어오면 ok버튼 화성화
+				if True:
+					self.textEdit_tcp1.setText(self.c_socket1)
+					print("ok!")
+		except:
+			pass
+
+	#3page 카운트 다운,5page 카운트 다운 조건
 	def lcd_run(self):
-		lcd = self.lcdNumber_open2
-		for k in range(1,60):
-			lcd_text = k
-			lcd.display(lcd_text)
+		lcd1 = self.lcdNumber_open1
+		lcd2 = self.lcdNumber_open2
+		lcd5 = self.lcdNumber_open5
+		lcd6 = self.lcdNumber_open6
+		current_index = self.stackedWidget.currentIndex()
+		if self.page_num > 0:
+			self.page_num -= 1
+		if current_index == 2:
+			if self.card1_connect == True:
+				lcd1.display(self.page_num)
+			elif self.card2_connect == True:
+				lcd2.display(self.page_num)
+		elif current_index == 4:
+			if self.card1_connect == True:
+				lcd5.display(self.page_num)
+			elif self.card2_connect == True:
+				lcd6.display(self.page_num)
 
-	def in1(self):		
+	#4page 카운트 업 조건
+	def lcd_run2(self):
+		lcd3 = self.lcdNumber_open3
+		lcd4 = self.lcdNumber_open4
+		current_index = self.stackedWidget.currentIndex()
+		if self.page_num2 < 500:
+			self.page_num2 += 1
+		if current_index == 3:
+			if self.card1_connect == True:
+				lcd3.display(self.page_num2)
+			elif self.card2_connect == True:
+				lcd4.display(self.page_num2)
+
+	#페이지 초기화,out2초기화,out4초기화
+	def in2in4(self):		
+		current_page = self.stackedWidget.currentIndex()
+		if self.card1_connect == True:
+			if GPIO.input(GPIO_DI[1]):
+				i = 0
+			else:
+				if current_page == 4:
+					current_page = 0
+					self.stackedWidget.setCurrentIndex(current_page)
+					GPIO.output(GPIO_DO[1],0)
+					self.output_Led2.setStyleSheet("Color:red;")
+					#self.card1_connect = False
+		if self.card2_connect == True:			
+			if GPIO.input(GPIO_DI[3]):
+				i = 0
+			else:
+				if current_page == 4:
+					current_page = 0
+					self.stackedWidget.setCurrentIndex(current_page)
+					GPIO.output(GPIO_DO[3],0)
+					self.output_Led4.setStyleSheet("Color:red;")
+					#self.card2_connect = False
+
+	#3page로 넘어가기 위한 조건,out1출력,out3출력
+	def in5in6_1(self):
+		current_page = self.stackedWidget.currentIndex()	
+		if current_page == 1:
+			if self.card1_connect == True:
+				if GPIO.input(GPIO_DI[4]):
+					i =1
+				else:
+					current_page = 2
+					self.stackedWidget.setCurrentIndex(current_page)
+					self.page_num = 60
+					GPIO.output(GPIO_DO[0],1)
+					self.output_Led1.setStyleSheet("Color:blue;")
+			if self.card2_connect == True:
+				if GPIO.input(GPIO_DI[5]):
+					i =1
+				else:
+					current_page = 2
+					self.stackedWidget.setCurrentIndex(current_page)
+					self.page_num = 60
+					GPIO.output(GPIO_DO[2],1)
+					self.output_Led3.setStyleSheet("Color:blue;")
+				
+	#4page로 넘어가기 위한 조건,out1초기화,out3초기화
+	def in5in6(self):
+		current_page = self.stackedWidget.currentIndex()
+		if current_page == 2: 
+			if GPIO.input(GPIO_DI[4]):
+				i = 1
+			else:
+				if GPIO.input(GPIO_DI[0]):
+					i = 1
+				else:
+					GPIO.output(GPIO_DO[0],0)
+					self.output_Led1.setStyleSheet("Color:red;")
+					current_page = 3
+					self.stackedWidget.setCurrentIndex(current_page)
+					self.page_num2 = 0 # 4page시간초 초기화
+			if GPIO.input(GPIO_DI[5]):
+				i = 1
+			else:
+				if GPIO.input(GPIO_DI[2]):
+					i = 1
+				else:
+					GPIO.output(GPIO_DO[2],0)
+					self.output_Led3.setStyleSheet("Color:red;")
+					current_page = 3
+					self.stackedWidget.setCurrentIndex(current_page)
+					self.page_num2 = 0 # 4page시간초 초기화
+	
+	#5page로 넘어가기 위한 조건,out2출력,out4출력
+	def in5in6_2(self):
+		current_page = self.stackedWidget.currentIndex()
+		if current_page == 3:
+			if self.card1_connect == True:
+				if  GPIO.input(GPIO_DI[4]):
+					current_page = 4
+					self.stackedWidget.setCurrentIndex(current_page)
+					self.page_num = 60 #page5 시간초 초기화
+					GPIO.output(GPIO_DO[1],1)
+					self.output_Led2.setStyleSheet("Color:blue;")
+			if self.card2_connect == True:		
+				if  GPIO.input(GPIO_DI[5]):
+					current_page = 4
+					self.stackedWidget.setCurrentIndex(current_page)
+					self.page_num = 60 #page5 시간초 초기화
+					GPIO.output(GPIO_DO[3],1)
+					self.output_Led4.setStyleSheet("Color:blue;")
+
+	def in_led(self):
 		if GPIO.input(GPIO_DI[0]):
 			self.input_Led1.setStyleSheet("Color:red;")
 		else:
 			self.input_Led1.setStyleSheet("Color:blue;")
-	def in2(self):		
 		if GPIO.input(GPIO_DI[1]):
 			self.input_Led2.setStyleSheet("Color:red;")
 		else:
 			self.input_Led2.setStyleSheet("Color:blue;")
-			
+		if GPIO.input(GPIO_DI[2]):
+			self.input_Led3.setStyleSheet("Color:red;")
+		else:
+			self.input_Led3.setStyleSheet("Color:blue;")
+		if GPIO.input(GPIO_DI[3]):
+			self.input_Led4.setStyleSheet("Color:red;")
+		else:
+			self.input_Led4.setStyleSheet("Color:blue;")
+		if GPIO.input(GPIO_DI[4]):
+			self.input_Led5.setStyleSheet("Color:red;")
+		else:
+			self.input_Led5.setStyleSheet("Color:blue;")
+		if GPIO.input(GPIO_DI[5]):
+			self.input_Led6.setStyleSheet("Color:red;")
+		else:
+			self.input_Led6.setStyleSheet("Color:blue;")		
+
 	def cb_timeout(self):
 		self.currentDateTime = QDateTime.currentDateTime() # 시간 받아옴
 		self.dateTimeEdit.setDateTime(self.currentDateTime) # 받아온 시간을 GUI 에 표시
-	
-	#카드 리더기로 데이터가 읽히고, DB에 정상 조회되면 버튼이 활성화 된다.
-	#여기다가 처리할 로직 넣으면 됨
-	def pushButton_silo1_func(self):
-		self.pushButton_silo1.setEnabled(False)
-		self.pushButton_silo2.setEnabled(True)
-		GPIO.output(GPIO_DO[0], 1)
-		GPIO.output(GPIO_DO[1], 0)
-		self.output_Led2.setStyleSheet("Color:red;")
-		self.output_Led1.setStyleSheet("Color:blue;")
-	
-	def pushButton_silo2_func(self):
-		self.pushButton_silo1.setEnabled(True)
-		self.pushButton_silo2.setEnabled(False)
-		GPIO.output(GPIO_DO[1], 1)
-		GPIO.output(GPIO_DO[0], 0)
-		self.output_Led1.setStyleSheet("Color:red;")
-		self.output_Led2.setStyleSheet("Color:blue;")
-		
 
+		#current_index = func();
+		#if current_index == 5:
+		#	lcd_display(num);
+		#if num > 0:
+		#	num -= 1;
+		#self.num = 60; <-  5페이지로 가는 문구에서  num 을 60으로 초기화하면 알아서 자동으로 카운트다운 시작함.
+	
+	#ok1 버튼이 클릭되면 페이지 넘김
 	def pushButton_ok1_func(self):
-			current_page = self.stackedWidget.currentIndex()
-			self.stackedWidget.setCurrentIndex(current_page+1)
-
-	def pushButton_ok2_func(self):
 			current_page = self.stackedWidget.currentIndex()
 			self.stackedWidget.setCurrentIndex(current_page+1)
 

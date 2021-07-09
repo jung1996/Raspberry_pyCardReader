@@ -1,15 +1,10 @@
-# https://nalara12200.tistory.com/153 참고
-# https://blog.naver.com/PostView.nhn?blogId=kkrdiamond77&logNo=221276401746&categoryNo=68&parentCategoryNo=0&viewDate=&currentPage=1&postListTopCurrentPage=1&from=postView
-# https://nowonbun.tistory.com/668
-# 쓰레드
-# https://m.blog.naver.com/PostView.naver?blogId=kkrdiamond77&logNo=221276401746&proxyReferer=https:%2F%2Fwww.google.com%2F
 '''
   메시지를 추상화한 클래스.
 
   MESSAGE VERSION 1 -----
   
   1. STX - CMD - MSG - ETX
-    1byte  2byte 8byte 1byte
+/t1byte  2byte 8byte 1byte
   
   STX : 0x02 메시지의 시작을 알림
   CMD = GPIO 제어 방식 선택
@@ -17,6 +12,8 @@
   ETX : 0x03, 고정 값,메시지 끝을 알림
 
 '''
+
+from PyQt5.QtCore import *
 import socket
 import threading
 import struct
@@ -40,8 +37,7 @@ class SockMsgRecvThread(threading.Thread, QObject):
 
 	# QR 및 링크를 정상적으로 읽어냈다면, GUI로 알리기 위한 기능 emit()하면 데이터를 보낼 수 있음
 	recv_cplt = pyqtSignal(str, str)
-
-    def __init__(self, socket):
+	def __init__(self, socket):    
 		threading.Thread.__init__(self)
 		self.socket = socket
 		self.recv_cmd = ''
@@ -65,21 +61,21 @@ class SockMsgRecvThread(threading.Thread, QObject):
 						if self.state == self.STATE_STX: # STX 수신 대기
 						
 							if data[i] == SOCK_STX:
-								self.state = STATE_CMD
-							else
+								self.state = self.STATE_CMD
+							else:
 								break
 							
 						elif self.state == self.STATE_CMD: # CMD 메시지 수신 상태
 						
 							self.recv_cmd += data[i]
 							if len(self.recv_cmd) == 2:
-								self.state = STATE_MSG
+								self.state = self.STATE_MSG
 						
 						elif self.state == self.STATE_MSG:
 						
 							self.recv_msg += data[i]
 							if len(self.recv_msg) == 8:
-								self.state = STATE_ETX
+								self.state = self.STATE_ETX
 								
 						elif self.state == self.STATE_ETX:
 						
@@ -87,7 +83,7 @@ class SockMsgRecvThread(threading.Thread, QObject):
 									self.recv_cplt.emit(self.recv_cmd, self.recv_msg)
 									print('recv cmd :', self.recv_cmd)
 									print('recv msg :', self.recv_msg)
-								else
+								else:
 									break
 				
 				# 패킷 종료, 스테이터스 초기화
@@ -97,5 +93,3 @@ class SockMsgRecvThread(threading.Thread, QObject):
 
 	def Stop(self):
 		self.running = False
-
-			

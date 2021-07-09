@@ -35,9 +35,9 @@
      <string notr="true">color: rgb(0, 0, 0);</string>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>0</number>
     </property>
-    <widget class="QWidget" name="page">
+    <widget class="QWidget" name="page1">
      <widget class="QGroupBox" name="groupBox1">
       <property name="geometry">
        <rect>
@@ -69,7 +69,7 @@
         <string notr="true">color: rgb(255, 0, 0);</string>
        </property>
        <property name="text">
-        <string>silo 1</string>
+        <string>1번 투입구</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_silo2">
@@ -91,7 +91,7 @@
         <string notr="true">color:rgb(255, 0, 0)</string>
        </property>
        <property name="text">
-        <string>silo2</string>
+        <string>2번 투입구</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_ok1">
@@ -109,7 +109,7 @@
       </widget>
      </widget>
     </widget>
-    <widget class="QWidget" name="page_2">
+    <widget class="QWidget" name="page2">
      <widget class="QGroupBox" name="groupBox2">
       <property name="geometry">
        <rect>
@@ -132,7 +132,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>card number ok?</string>
+        <string>card1 number ok?</string>
        </property>
       </widget>
       <widget class="QTextEdit" name="textEdit_card1">
@@ -189,25 +189,25 @@
         </rect>
        </property>
        <property name="text">
-        <string>card number ok?</string>
+        <string>card2 number ok?</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_ok2">
+      <widget class="QLabel" name="label_9">
        <property name="geometry">
         <rect>
-         <x>300</x>
-         <y>160</y>
-         <width>99</width>
-         <height>30</height>
+         <x>270</x>
+         <y>200</y>
+         <width>261</width>
+         <height>51</height>
         </rect>
        </property>
        <property name="text">
-        <string>ok Button</string>
+        <string>카드를 넣어주세요</string>
        </property>
       </widget>
      </widget>
     </widget>
-    <widget class="QWidget" name="page_13">
+    <widget class="QWidget" name="page3">
      <widget class="QGroupBox" name="groupBox3">
       <property name="geometry">
        <rect>
@@ -239,7 +239,7 @@
         <string notr="true">color: rgb(0, 255, 0);</string>
        </property>
        <property name="text">
-        <string>silo 1</string>
+        <string>1번 투입구</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_silo4">
@@ -261,7 +261,7 @@
         <string notr="true">color: rgb(0, 255, 0);</string>
        </property>
        <property name="text">
-        <string>silo 1</string>
+        <string>2번 투입구</string>
        </property>
       </widget>
       <widget class="QLCDNumber" name="lcdNumber_open2">
@@ -287,7 +287,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>opening</string>
+        <string>밸브 open 남은시간</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_8">
@@ -300,47 +300,25 @@
         </rect>
        </property>
        <property name="text">
-        <string>opening</string>
+        <string>밸브 open 남은시간</string>
        </property>
       </widget>
-      <widget class="QTextEdit" name="textEdit_time1">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
+      <widget class="QLCDNumber" name="lcdNumber_open1">
        <property name="geometry">
         <rect>
-         <x>160</x>
+         <x>170</x>
          <y>80</y>
-         <width>131</width>
-         <height>30</height>
+         <width>101</width>
+         <height>41</height>
         </rect>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>30</height>
-        </size>
        </property>
        <property name="styleSheet">
         <string notr="true">color:rgb(255, 0, 4)</string>
        </property>
-       <property name="frameShape">
-        <enum>QFrame::WinPanel</enum>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="lineEdit_time1">
-       <property name="geometry">
-        <rect>
-         <x>30</x>
-         <y>80</y>
-         <width>113</width>
-         <height>32</height>
-        </rect>
-       </property>
       </widget>
      </widget>
     </widget>
-    <widget class="QWidget" name="page_14">
+    <widget class="QWidget" name="page4">
      <widget class="QGroupBox" name="groupBox4">
       <property name="geometry">
        <rect>
@@ -372,7 +350,7 @@
         <string notr="true">color: rgb(0, 255, 0);</string>
        </property>
        <property name="text">
-        <string>silo 1</string>
+        <string>1번 투입구</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_silo6">
@@ -394,27 +372,7 @@
         <string notr="true">color: rgb(0, 255, 0);</string>
        </property>
        <property name="text">
-        <string>silo 1</string>
-       </property>
-      </widget>
-      <widget class="QTimeEdit" name="timeEdit">
-       <property name="geometry">
-        <rect>
-         <x>200</x>
-         <y>10</y>
-         <width>118</width>
-         <height>32</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QTimeEdit" name="timeEdit_2">
-       <property name="geometry">
-        <rect>
-         <x>470</x>
-         <y>10</y>
-         <width>118</width>
-         <height>32</height>
-        </rect>
+        <string>2번 투입구</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_4">
@@ -427,7 +385,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>puttung in</string>
+        <string>1번 투입중</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_5">
@@ -440,12 +398,51 @@
         </rect>
        </property>
        <property name="text">
-        <string>puttung in</string>
+        <string>2번 투입중</string>
+       </property>
+      </widget>
+      <widget class="QTimeEdit" name="timeEdit_2">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>40</y>
+         <width>118</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="displayFormat">
+        <string>hh:mm:ss</string>
+       </property>
+      </widget>
+      <widget class="QLCDNumber" name="lcdNumber_open4">
+       <property name="geometry">
+        <rect>
+         <x>470</x>
+         <y>0</y>
+         <width>101</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color:rgb(255, 0, 4)</string>
+       </property>
+      </widget>
+      <widget class="QLCDNumber" name="lcdNumber_open3">
+       <property name="geometry">
+        <rect>
+         <x>210</x>
+         <y>0</y>
+         <width>101</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color:rgb(255, 0, 4)</string>
        </property>
       </widget>
      </widget>
     </widget>
-    <widget class="QWidget" name="page_15">
+    <widget class="QWidget" name="page5">
      <widget class="QGroupBox" name="groupBox5">
       <property name="geometry">
        <rect>
@@ -458,27 +455,100 @@
       <property name="title">
        <string>page5</string>
       </property>
-      <widget class="QTextEdit" name="textEdit_17">
+      <widget class="QPushButton" name="pushButton_silo7">
        <property name="geometry">
         <rect>
-         <x>30</x>
-         <y>60</y>
-         <width>261</width>
-         <height>351</height>
+         <x>190</x>
+         <y>50</y>
+         <width>151</width>
+         <height>251</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 255, 0);</string>
+       </property>
+       <property name="text">
+        <string>1번 투입구</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_silo8">
+       <property name="geometry">
+        <rect>
+         <x>480</x>
+         <y>50</y>
+         <width>151</width>
+         <height>251</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 255, 0);</string>
+       </property>
+       <property name="text">
+        <string>2번 투입구</string>
+       </property>
+      </widget>
+      <widget class="QLCDNumber" name="lcdNumber_open5">
+       <property name="geometry">
+        <rect>
+         <x>210</x>
+         <y>70</y>
+         <width>101</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color:rgb(255, 0, 4)</string>
+       </property>
+      </widget>
+      <widget class="QLCDNumber" name="lcdNumber_open6">
+       <property name="geometry">
+        <rect>
+         <x>510</x>
+         <y>60</y>
+         <width>101</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color:rgb(255, 0, 4)</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>190</x>
+         <y>20</y>
+         <width>151</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>밸브 close 남은시간</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_7">
        <property name="geometry">
         <rect>
-         <x>470</x>
-         <y>150</y>
-         <width>68</width>
+         <x>480</x>
+         <y>20</y>
+         <width>151</width>
          <height>22</height>
         </rect>
        </property>
        <property name="text">
-        <string>image</string>
+        <string>밸브 close 남은시간</string>
        </property>
       </widget>
      </widget>
@@ -672,7 +742,7 @@
    <widget class="QLabel" name="input_Led1">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>10</x>
       <y>400</y>
       <width>71</width>
       <height>61</height>
@@ -694,7 +764,7 @@
    <widget class="QLabel" name="input_Led2">
     <property name="geometry">
      <rect>
-      <x>120</x>
+      <x>90</x>
       <y>400</y>
       <width>71</width>
       <height>61</height>
@@ -716,7 +786,7 @@
    <widget class="QLabel" name="output_Led1">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>490</x>
       <y>400</y>
       <width>71</width>
       <height>61</height>
@@ -738,7 +808,7 @@
    <widget class="QLabel" name="output_Led2">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>570</x>
       <y>400</y>
       <width>71</width>
       <height>61</height>
@@ -755,6 +825,138 @@
     </property>
     <property name="text">
      <string>output02</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="input_Led3">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>400</y>
+      <width>71</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:rgb(255, 0, 4)</string>
+    </property>
+    <property name="text">
+     <string>input03</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="output_Led3">
+    <property name="geometry">
+     <rect>
+      <x>650</x>
+      <y>400</y>
+      <width>71</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:rgb(255, 0, 4)</string>
+    </property>
+    <property name="text">
+     <string>output03</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="output_Led4">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>400</y>
+      <width>71</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:rgb(255, 0, 4)</string>
+    </property>
+    <property name="text">
+     <string>output04</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="input_Led4">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>400</y>
+      <width>71</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:rgb(255, 0, 4)</string>
+    </property>
+    <property name="text">
+     <string>input04</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="input_Led5">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>400</y>
+      <width>71</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:rgb(255, 0, 4)</string>
+    </property>
+    <property name="text">
+     <string>input05</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="input_Led6">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>400</y>
+      <width>71</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:rgb(255, 0, 4)</string>
+    </property>
+    <property name="text">
+     <string>input06</string>
     </property>
    </widget>
   </widget>

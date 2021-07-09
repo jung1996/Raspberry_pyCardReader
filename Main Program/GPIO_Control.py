@@ -2,11 +2,10 @@ import RPi.GPIO as GPIO #GPIO 라이브러리 불러오기
 
 class GPIO_Control():
 
-	GPIO_DO = [2,3,17,18,27,22,23,24]
-	GPIO_DI = [11,7,6,16,19,20,26,21]
-
 	def __init__(self):
-	
+		
+		self.GPIO_DO = [2,3,17,18,27,22,23,24]
+		self.GPIO_DI = [11,7,6,16,19,20,26,21]
 		#불필요한 WARNING 제거
 		GPIO.setwarnings(False)
         
@@ -14,11 +13,11 @@ class GPIO_Control():
 		GPIO.setmode(GPIO.BCM)
 		
 		#GPIO_INPUT 핀 설정
-		for channel in GPIO_DI:
-			GPIO.setup([channel], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+		for channel in self.GPIO_DI:
+			GPIO.setup([channel], GPIO.IN)
 			
 		#GPIO_OUTPUT 핀 설정
-		for channel in GPIO_DO:
+		for channel in self.GPIO_DO:
 			GPIO.setup([channel], GPIO.OUT, initial=GPIO.LOW)
 
 	'''def gpio_write_pin(channel, pin_state):
