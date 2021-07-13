@@ -36,9 +36,11 @@ class SockMsgRecvThread(threading.Thread, QObject):
 		STATE_ETX = 3			# MSG을 수신했고, ETX 수신 대기중
 
 	# QR 및 링크를 정상적으로 읽어냈다면, GUI로 알리기 위한 기능 emit()하면 데이터를 보낼 수 있음
-	recv_cplt = pyqtSignal(str, str)
+	recv_cplt1 = pyqtSignal(int, str, str)
+
 	def __init__(self, socket):    
 		threading.Thread.__init__(self)
+		QObject.__init__(self)
 		self.socket = socket
 		self.recv_cmd = ''
 		self.recv_msg = ''
@@ -80,7 +82,7 @@ class SockMsgRecvThread(threading.Thread, QObject):
 						elif self.state == self.STATE_ETX:
 						
 								if data[i] == SOCK_ETX:
-									self.recv_cplt.emit(self.recv_cmd, self.recv_msg)
+									self.recv_cplt1.emit(self.recv_cmd, self.recv_msg)
 									print('recv cmd :', self.recv_cmd)
 									print('recv msg :', self.recv_msg)
 								else:

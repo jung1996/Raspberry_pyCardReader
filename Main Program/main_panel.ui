@@ -94,17 +94,26 @@
         <string>2번 투입구</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_ok1">
+      <widget class="QTextEdit" name="textEdit_tcp1">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="geometry">
         <rect>
-         <x>300</x>
-         <y>130</y>
-         <width>99</width>
+         <x>260</x>
+         <y>20</y>
+         <width>181</width>
          <height>30</height>
         </rect>
        </property>
-       <property name="text">
-        <string>ok Button</string>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::WinPanel</enum>
        </property>
       </widget>
      </widget>

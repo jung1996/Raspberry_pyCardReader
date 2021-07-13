@@ -64,9 +64,7 @@ class Camera_Thread(threading.Thread, QObject):
 				# the timestamp + barcode to disk and update the set
 				# 현재 바코드 텍스트가 CSV 파일안에 없을경우, timestamp, barcode를 작성하고 업데이트
 				if barcodeData not in self.found:
-					self.csv.write("{},{}\n".format(datetime.datetime.now(),barcodeData))
-					self.csv.flush()
-					self.found.add(barcodeData)
+					self.recv_cplt.emit(barcodeData)
 
 					# show the output frame
 			cv2.imshow("Barcode Scanner", frame)

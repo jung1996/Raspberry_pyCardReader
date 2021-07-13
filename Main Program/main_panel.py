@@ -82,15 +82,17 @@ class MainWindow(QMainWindow, ui_form):
 		timer.timeout.connect(self.in5in6)
 		timer.timeout.connect(self.lcd_run)
 		timer.timeout.connect(self.lcd_run2)
+
+		self.SOCK_CONTENT_CMD_DO_ONOFF = 1
 	
 		#종료 버튼 활성화
 		self.pushButton_exit1.clicked.connect(QCoreApplication.instance().quit)
 		
 		#회면1 OK버튼 활성화
-		self.pushButton_ok1.clicked.connect(self.pushButton_ok1_func)
+		#self.pushButton_ok1.clicked.connect(self.pushButton_ok1_func)
 
 		#화면1버튼 초기 값 설정
-		self.pushButton_ok1.setEnabled(False)
+		#self.pushButton_ok1.setEnabled(False)
 
 		#self.gpio = GPIO_Control.GPIO_Control()
 		#self.gpio.write_gpio(pin1,high);
@@ -165,21 +167,24 @@ class MainWindow(QMainWindow, ui_form):
 			print('QR1 통신 포트 연결 실패!! ')'''
 
 		try:
+			host = '192.168.11.162'
+			port = 7002
 			#서버에 Bind
 			c_socket = socket(AF_INET, SOCK_STREAM)
-			c_socket.connect((cfg.SOCK_IP, cfg.SOCK_PORT))
-			
+			c_socket.connect(((host),(port)))
 			#데이터 송신 방법
-			#c_socket.send('send data!!'.encode('utf-8'))
+			c_socket.send('send data!!'.encode('utf-8'))
+
+			print('(recv data) card_id1 :', c_socket)
 			
 			# SOCK 데이터 읽는 쓰레드 생성
 			sock_recv = WinSock_Msg.SockMsgRecvThread(c_socket)
 			
 			# sock 통신으로부터 cmd, msg 데이터가 정상 ""수신""되면 호출되는 콜백함수
-			sock_recv.recv_cplt.connect(self.cb_sock_recv_cplt)
+			sock_recv.recv_cplt1.connect(self.cb_sock_recv_cplt)
 			sock_recv.start()
 			
-		except(OSError):
+		except (OSError, TypeError):
 			print('SOCK 통신 연결 실패!! ')
 
 		
@@ -223,9 +228,11 @@ class MainWindow(QMainWindow, ui_form):
 		except:
 			pass
 
-	@pyqtSlot(int, str)
+	'''@pyqtSlot(str, str)
 	def cb_sock_recv_cplt(self, c_socket):
 		try:
+			if c_socket == self.SOCK_CONTENT_CMD_DO_ONOFF:
+				i = 1
 			self.c_socket1 = c_socket
 			if True:
 				print('(recv data) TCP/IP :', self.c_socket1)
@@ -236,7 +243,15 @@ class MainWindow(QMainWindow, ui_form):
 					self.textEdit_tcp1.setText(self.c_socket1)
 					print("ok!")
 		except:
-			pass
+			pass'''
+
+	@pyqtSlot(int, str ,str)
+	def cb_sock_recv_cplt(self):
+		if True:
+			print('1234')
+			print('(recv data) card_id1 :', self.recv_msg)
+			print('(recv data) card_id1 :', self.recv_cmd)
+		
 
 	#3page 카운트 다운,5page 카운트 다운 조건
 	def lcd_run(self):
